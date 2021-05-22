@@ -1,0 +1,5 @@
+set home/alo alo
+set home/alo/adeus balo
+set home/alo/ola ?
+list home/
+quit

@@ -12,7 +12,7 @@
 
 #define FIND_DESCRIPTION "find: Imprime o valor armazenado."
 
-#define LIST_DESCRIPTION "list: Lista todos os componentes de um caminho."
+#define LIST_DESCRIPTION "list: Lista todos os componentes imediatos de um sub-caminho."
 
 #define SEARCH_DESCRIPTION "search: Procura o caminho dado um valor."
 

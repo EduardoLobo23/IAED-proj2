@@ -33,7 +33,6 @@ void STinsert(link* head, char* path) {
 
 char* searchR(link head, char* path) {
     if (head == NULL) {
-        puts("not found");
         return "";
     }
     if (strcmp(path, head->path) == 0)

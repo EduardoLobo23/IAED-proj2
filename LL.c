@@ -32,8 +32,9 @@ void LLinsert(pnode* head, char* path) {
 
 void LLprint(pnode head) {
     pnode t;
-    for (t = head; t != NULL; t = t->next)
+    for (t = head; t != NULL; t = t->next) {
         puts(t->path);
+    }
 }
 
 pnode deletenode(pnode head, char* path) {
@@ -60,4 +61,16 @@ pnode freenode(pnode head) {
 void LLfree(pnode* head) {
     *head = freenode(*head);
     free(head);
+}
+
+pnode lookupnode(pnode head, char* path) {
+    pnode t;
+    for (t = head; t != NULL; t = t->next)
+        if (strcmp(t->path, path) == 0)
+            return t;
+    return NULL;
+}
+
+void LLlookup(pnode* head, char* path) {
+    *head = lookupnode(*head, path);
 }

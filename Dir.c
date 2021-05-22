@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-pDir NEWDir(char* path, char* value) {
+pDir NEWDir(char* path, char* name, char* value) {
     pDir x = (pDir)malloc(sizeof(struct Dir));
     /* cria a LL que vai conter os filhos */
     x->subdirsOC = (pnode*)malloc(sizeof(pnode));
@@ -15,6 +15,8 @@ pDir NEWDir(char* path, char* value) {
     /* guarda o path e o value */
     x->path = (char*)malloc(sizeof(char) * (strlen(path) + 1));
     strcpy(x->path, path);
+    x->name = (char*)malloc(sizeof(char) * (strlen(name) + 1));
+    strcpy(x->name, name);
     x->value = (char*)malloc(sizeof(char) * (strlen(value) + 1));
     strcpy(x->value, value);
     return x;
@@ -36,16 +38,36 @@ void listDir(pDir dir) {
     STsort(*(dir->subdirsABC));
 }
 
+void printDir(pDir dir) {
+    LLprint(*(dir->subdirsOC));
+}
+
 void freeDir(pDir dir) {
     free(dir->value);
+    free(dir->name);
     free(dir->path);
-    /*STfree(dir->subdirsABC);*/
-    LLfree(dir->subdirsOC);
-    STfree(dir->subdirsABC);
+    if (dir->subdirsOC != NULL)
+        LLfree(dir->subdirsOC);
+    if (dir->subdirsABC != NULL)
+        STfree(dir->subdirsABC);
     free(dir);
 }
 
 void insertsubDir(pDir dir, char* subdir) {
     STinsert(dir->subdirsABC, subdir);
     LLinsert(dir->subdirsOC, subdir);
+}
+
+int subdirofDir(pDir dir, char* path) {
+    return strcmp(STsearch(*(dir->subdirsABC), path), "") != 0;
+}
+
+void changevalueDir(pDir dir, char* newvalue) {
+    free(dir->value);
+    dir->value = (char*)malloc(sizeof(char) * (strlen(newvalue) + 1));
+    strcpy(dir->value, newvalue);
+}
+
+void deleteDir(pDir dir) {
+    puts(dir->value);
 }

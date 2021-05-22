@@ -14,5 +14,6 @@ void LLinit(pnode*);
 void LLinsert(pnode*, char*);
 void LLfree(pnode*);
 void LLprint(pnode);
+void LLlookup(pnode*, char*);
 
 #endif
