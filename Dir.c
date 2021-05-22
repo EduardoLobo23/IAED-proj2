@@ -53,9 +53,9 @@ void freeDir(pDir dir) {
     free(dir);
 }
 
-void insertsubDir(pDir dir, char* subdir) {
-    STinsert(dir->subdirsABC, subdir);
-    LLinsert(dir->subdirsOC, subdir);
+void insertsubDir(pDir dir, char* subdir, char* name) {
+    STinsert(dir->subdirsABC, name);
+    LLinsert(dir->subdirsOC, subdir, name);
 }
 
 int subdirofDir(pDir dir, char* path) {

@@ -22,7 +22,7 @@ char* key(pDir);
 int eq(char*, char*);
 int less(char*, char*);
 void freeDir(pDir);
-void insertsubDir(pDir, char*);
+void insertsubDir(pDir, char*, char*);
 int subdirofDir(pDir, char*);
 void changevalueDir(pDir, char*);
 void printDir(pDir);

@@ -8,26 +8,28 @@ void LLinit(pnode* head) {
     *head = NULL;
 }
 
-pnode NEWnode(char* path) {
+pnode NEWnode(char* path, char* name) {
     pnode x = (pnode)malloc(sizeof(struct node));
     x->path = (char*)malloc(sizeof(char) * (strlen(path) + 1));
     strcpy(x->path, path);
+    x->name = (char*)malloc(sizeof(char) * (strlen(name) + 1));
+    strcpy(x->name, name);
     x->next = NULL;
     return x;
 }
 
-pnode insertnode(pnode head, char* path) {
+pnode insertnode(pnode head, char* path, char* name) {
     pnode x;
     if (head == NULL)
-        return NEWnode(path);
+        return NEWnode(path, name);
     for (x = head; x->next != NULL; x = x->next)
         ;
-    x->next = NEWnode(path);
+    x->next = NEWnode(path, name);
     return head;
 }
 
-void LLinsert(pnode* head, char* path) {
-    *head = insertnode(*head, path);
+void LLinsert(pnode* head, char* path, char* name) {
+    *head = insertnode(*head, path, name);
 }
 
 void LLprint(pnode head) {
@@ -44,6 +46,7 @@ pnode deletenode(pnode head, char* path) {
             if (t == head)
                 head = t->next;
             free(t->path);
+            free(t->name);
             free(t);
             break;
         }

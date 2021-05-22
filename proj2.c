@@ -31,7 +31,7 @@ void find(pnodeDirs*);
 void list(pnodeDirs*);
 
 /* Procura o caminho dado num valor. */
-/*void search(); */
+void search(pnodeDirs*);
 
 /* Apaga um caminho e todos os subcaminhos. */
 void delete (pnodeDirs*);
@@ -59,10 +59,8 @@ int main() {
             find(pDirs);
         if (strcmp(command, "list") == 0)
             list(pDirs);
-        /*
         if (strcmp(command, "search") == 0)
-            search();
-        */
+            search(pDirs);
         if (strcmp(command, "delete") == 0)
             delete (pDirs);
     }
@@ -87,7 +85,7 @@ void quit(pnodeDirs* pDirs) {
 
 void set(pnodeDirs* pDirs) {
     pDir x = LLdirslookup(pDirs, "root");
-    char path[200] = "/", value[100], buffer[200];
+    char path[200] = "/", value[200], buffer[200];
     char* token;
 
     scanf("%s", buffer);
@@ -95,11 +93,11 @@ void set(pnodeDirs* pDirs) {
     while (token != NULL) {
         strcat(path, token);
         if (subdirofDir(x, token) == 0) {
-            insertsubDir(x, token);
+            insertsubDir(x, path, token);
             x = NEWDir(path, token, "");
             LLdirsinsert(pDirs, x);
         } else {
-            x = LLdirslookup(pDirs, token);
+            x = LLdirslookuppath(pDirs, path);
         }
         strcat(path, "/");
         token = strtok(NULL, "/");
@@ -135,6 +133,19 @@ void list(pnodeDirs* pDirs) {
     }
 }
 
+void search(pnodeDirs* pDirs) {
+    pDir x;
+    char value[200];
+    getchar();
+    scanf("%[^\n]", value);
+    x = LLdirssearch(pDirs, value);
+    if (x == NULL) {
+        puts(NOT_FOUND_ERROR);
+        return;
+    }
+    puts(x->path);
+}
+
 void find(pnodeDirs* pDirs) {
     pDir x;
     char buffer[200], path[200] = "/";
@@ -160,8 +171,8 @@ void find(pnodeDirs* pDirs) {
 }
 
 void print(pnodeDirs* pDirs) {
-    pDir x = LLdirslookup(pDirs, "root");
-    printDir(x);
+    pDir root = LLdirslookup(pDirs, "root");
+    LLdirsprint(pDirs, root);
 }
 
 void delete (pnodeDirs* pDirs) {

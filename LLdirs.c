@@ -85,3 +85,33 @@ pDir LLdirslookuppath(pnodeDirs* head, char* path) {
 void LLdirsfree(pnodeDirs* head) {
     *head = freenodeDirs(*head);
 }
+
+pnodeDirs searchDirs(pnodeDirs head, char* value) {
+    pnodeDirs t;
+    for (t = head; t != NULL; t = t->next) {
+        if (strcmp(t->dir->value, value) == 0)
+            return t;
+    }
+    return NULL;
+}
+
+pDir LLdirssearch(pnodeDirs* head, char* value) {
+    pnodeDirs aux;
+    aux = searchDirs(*head, value);
+    if (aux == NULL)
+        return NULL;
+    return aux->dir;
+}
+
+void LLdirsprint(pnodeDirs* pDirs, pDir dir) {
+    pnode t = *(dir->subdirsOC);
+    pDir d;
+    for (; t != NULL; t = t->next) {
+        d = LLdirslookuppath(pDirs, t->path);
+        if (strcmp(d->value, "") != 0)
+            printf("%s %s\n", d->path, d->value);
+        if (d->subdirsOC != NULL) {
+            LLdirsprint(pDirs, d);
+        }
+    }
+}

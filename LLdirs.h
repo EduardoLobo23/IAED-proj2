@@ -14,5 +14,7 @@ void LLdirsinsert(pnodeDirs*, pDir);
 void LLdirsfree(pnodeDirs*);
 pDir LLdirslookup(pnodeDirs*, char*);
 pDir LLdirslookuppath(pnodeDirs*, char*);
+pDir LLdirssearch(pnodeDirs*, char*);
+void LLdirsprint(pnodeDirs*, pDir);
 
 #endif
