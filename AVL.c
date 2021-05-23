@@ -1,78 +1,83 @@
+/*
+ * File: AVL.c
+ * Author: Eduardo Lobo
+ * Description: Creation and manipulation of ADT "AVL".
+ */
+
 #include "AVL.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-link NEW(char* path, link l, link r) {
+/*----------------------------------------------------------------------*/
+
+/* Allocates memmory for a new node and assigns it a string. */
+link NEW(char* lcomponent, link l, link r) {
     link x = (link)malloc(sizeof(struct STnode));
-    x->path = (char*)malloc(sizeof(char) * (strlen(path) + 1));
-    strcpy(x->path, path);
+    x->lcomponent = (char*)malloc(sizeof(char) * (strlen(lcomponent) + 1));
+    strcpy(x->lcomponent, lcomponent);
     x->l = l;
     x->r = r;
     return x;
 }
 
-void STinit(link* head) {
-    *head = NULL;
-}
-
-link insertR(link head, char* path) {
+/* Inserts a new node on the tree. */
+link insertR(link head, char* lcomponent) {
     if (head == NULL)
-        return NEW(path, NULL, NULL);
-    if (strcmp(path, head->path) < 0)
-        head->l = insertR(head->l, path);
+        return NEW(lcomponent, NULL, NULL);
+    if (strcmp(lcomponent, head->lcomponent) < 0)
+        head->l = insertR(head->l, lcomponent);
     else
-        head->r = insertR(head->r, path);
+        head->r = insertR(head->r, lcomponent);
     return head;
 }
 
-void STinsert(link* head, char* path) {
-    *head = insertR(*head, path);
-}
-
-char* searchR(link head, char* path) {
+/* Searchs for the node that contains a certain string. */
+char* searchR(link head, char* lcomponent) {
     if (head == NULL) {
         return "";
     }
-    if (strcmp(path, head->path) == 0)
-        return head->path;
-    if (strcmp(path, head->path) < 0)
-        return searchR(head->l, path);
+    if (strcmp(lcomponent, head->lcomponent) == 0)
+        return head->lcomponent;
+    if (strcmp(lcomponent, head->lcomponent) < 0)
+        return searchR(head->l, lcomponent);
     else
-        return searchR(head->r, path);
+        return searchR(head->r, lcomponent);
 }
 
-char* STsearch(link head, char* key) {
-    return searchR(head, key);
+/* Traverses the tree in order, printing each nodes' content. */
+void sortR(link head) {
+    if (head == NULL)
+        return;
+    sortR(head->l);
+    puts(head->lcomponent);
+    sortR(head->r);
 }
 
+/* Returns the node that contains the biggest value, in this case,
+the string that comes last alphabetically . */
 link max(link head) {
     if (head == NULL || head->r == NULL)
         return head;
     return max(head->r);
 }
 
-link min(link head) {
-    if (head == NULL || head->l == NULL)
-        return head;
-    return min(head->l);
-}
-
-link deleteR(link head, char* path) {
+/* Deletes a certain node from the tree. */
+link deleteR(link head, char* lcomponent) {
     if (head == NULL)
         return head;
-    else if (strcmp(path, head->path) < 0)
-        head->l = deleteR(head->l, path);
-    else if (strcmp(head->path, path) < 0)
-        head->r = deleteR(head->r, path);
+    else if (strcmp(lcomponent, head->lcomponent) < 0)
+        head->l = deleteR(head->l, lcomponent);
+    else if (strcmp(head->lcomponent, lcomponent) < 0)
+        head->r = deleteR(head->r, lcomponent);
     else {
         if (head->l != NULL && head->r != NULL) {
             link aux = max(head->l);
-            char* x = head->path;
-            head->path = aux->path;
-            aux->path = x;
-            head->l = deleteR(head->l, aux->path);
+            char* x = head->lcomponent;
+            head->lcomponent = aux->lcomponent;
+            aux->lcomponent = x;
+            head->l = deleteR(head->l, aux->lcomponent);
         } else {
             link aux = head;
             if (head->l == NULL && head->r == NULL)
@@ -81,98 +86,45 @@ link deleteR(link head, char* path) {
                 head = head->r;
             else
                 head = head->l;
-            free(aux->path);
+            free(aux->lcomponent);
             free(aux);
         }
     }
     return head;
 }
 
-void STdelete(link* head, char* key) {
-    *head = deleteR(*head, key);
-}
-
-int count(link head) {
+/* Frees the memory allocated for the whole tree, each node at a time. */
+link freeR(link head) {
     if (head == NULL)
-        return 0;
-    return count(head->r) + count(head->l) + 1;
+        return head;
+    head->l = freeR(head->l);
+    head->r = freeR(head->r);
+    return deleteR(head, head->lcomponent);
 }
 
-int STcount(link head) {
-    return count(head);
+/*----------------------------------------------------------------------*/
+
+void STinit(link* head) {
+    *head = NULL;
 }
 
-void sortR(link head) {
-    if (head == NULL)
-        return;
-    sortR(head->l);
-    puts(head->path);
-    sortR(head->r);
+void STinsert(link* head, char* lcomponent) {
+    *head = insertR(*head, lcomponent);
+}
+
+char* STsearch(link head, char* lcomponent) {
+    return searchR(head, lcomponent);
 }
 
 void STsort(link head) {
     sortR(head);
 }
 
-link freeR(link head) {
-    if (head == NULL)
-        return head;
-    head->l = freeR(head->l);
-    head->r = freeR(head->r);
-    return deleteR(head, head->path);
+void STdelete(link* head, char* lcomponent) {
+    *head = deleteR(*head, lcomponent);
 }
 
 void STfree(link* head) {
     *head = freeR(*head);
     free(head);
-}
-
-int height(link head) {
-    int u, v;
-
-    if (head == NULL)
-        return -1;
-    u = height(head->l);
-    v = height(head->r);
-    if (u > v)
-        return u + 1;
-    return v + 1;
-}
-
-void traversePreOrder(link head) {
-    if (head == NULL)
-        return;
-    puts(head->path);
-    traversePreOrder(head->l);
-    traversePreOrder(head->r);
-}
-
-void traverseInOrder(link head) {
-    if (head == NULL)
-        return;
-    traverseInOrder(head->l);
-    puts(head->path);
-    traverseInOrder(head->r);
-}
-
-void traversePostOrder(link head) {
-    if (head == NULL)
-        return;
-    traversePostOrder(head->l);
-    traversePostOrder(head->r);
-    puts(head->path);
-}
-
-link rotL(link head) {
-    link x = head->r;
-    head->r = x->l;
-    x->l = head;
-    return x;
-}
-
-link rotR(link head) {
-    link x = head->l;
-    head->l = x->r;
-    x->r = head;
-    return x;
 }

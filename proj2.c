@@ -1,68 +1,65 @@
 /*
  * File: proj2.c
  * Author: Eduardo Lobo
- * Description:
+ * Description: A program simulating a hierarchical storage system.
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "Dir.h"
-#include "LLdirs.h"
+#include "LLpaths.h"
+#include "Path.h"
 #include "consts.h"
 
 /* Imprime os comandos disponiveis. */
 void help();
 
 /* Termina o programa */
-void quit(pnodeDirs*);
+void quit(pnodePaths*);
 
 /* Adiciona ou modifica o valor a armazenar. */
-void set(pnodeDirs*);
+void set(pnodePaths*);
 
 /* Imprime todos os caminhos e valores. */
-void print(pnodeDirs*);
+void print(pnodePaths*);
 
 /* Imprime o valor armazenado. */
-void find(pnodeDirs*);
+void find(pnodePaths*);
 
-/* Lista todos os componentes de um caminho. */
-void list(pnodeDirs*);
+/* Lista todos os componentes imediatos de um sub-caminho. */
+void list(pnodePaths*);
 
 /* Procura o caminho dado num valor. */
-void search(pnodeDirs*);
+void search(pnodePaths*);
 
 /* Apaga um caminho e todos os subcaminhos. */
-void delete (pnodeDirs*);
+void delete (pnodePaths*);
 
 int main() {
-    pnodeDirs Dirs;
-    pnodeDirs* pDirs = &Dirs;
-    pDir root = NEWDir("root", "root", "");
+    pnodePaths Paths;
+    pnodePaths* pPaths = &Paths;
+    pPath root = NEWPath(ROOT_NAME, ROOT_LCOMPONENT, NULL_VALUE);
     char command[7];
-
-    LLdirsinit(pDirs);
-
-    LLdirsinsert(pDirs, root);
-
+    LLpathsinit(pPaths);
+    LLpathsinsert(pPaths, root);
     while (scanf("%s", command)) {
         if (strcmp(command, "help") == 0)
             help();
         if (strcmp(command, "quit") == 0)
-            quit(pDirs);
+            quit(pPaths);
         if (strcmp(command, "set") == 0)
-            set(pDirs);
+            set(pPaths);
         if (strcmp(command, "print") == 0)
-            print(pDirs);
+            print(pPaths);
         if (strcmp(command, "find") == 0)
-            find(pDirs);
+            find(pPaths);
         if (strcmp(command, "list") == 0)
-            list(pDirs);
+            list(pPaths);
         if (strcmp(command, "search") == 0)
-            search(pDirs);
+            search(pPaths);
         if (strcmp(command, "delete") == 0)
-            delete (pDirs);
+            delete (pPaths);
     }
     return 0;
 }
@@ -78,140 +75,141 @@ void help() {
     puts(DELETE_DESCRIPTION);
 }
 
-void quit(pnodeDirs* pDirs) {
-    LLdirsfree(pDirs);
+void quit(pnodePaths* pPaths) {
+    LLpathsfree(pPaths);
     exit(0);
 }
 
-void set(pnodeDirs* pDirs) {
-    pDir x = LLdirslookup(pDirs, "root");
-    char path[65525] = "/", value[200], buffer[65525];
-    char* token;
+void set(pnodePaths* pPaths) {
+    pPath path = LLpathslookup(pPaths, ROOT_NAME);
+    char name[MAX_INPUT_BUFFER] = SEP, value[200], buffer[MAX_INPUT_BUFFER];
+    char* component;
 
     scanf("%s", buffer);
-    token = strtok(buffer, "/");
-    while (token != NULL) {
-        strcat(path, token);
-        if (subdirofDir(x, token) == 0) {
-            insertsubDir(x, path, token);
-            x = NEWDir(path, token, "");
-            LLdirsinsert(pDirs, x);
+    component = strtok(buffer, SEP);
+    while (component != NULL) {
+        strcat(name, component);
+        if (Pathissubpathof(path, component) == 0) {
+            Pathinsertsubpath(path, name, component);
+            path = NEWPath(name, component, NULL_VALUE);
+            LLpathsinsert(pPaths, path);
         } else {
-            x = LLdirslookuppath(pDirs, path);
+            path = LLpathslookup(pPaths, name);
         }
-        strcat(path, "/");
-        token = strtok(NULL, "/");
+        strcat(name, SEP);
+        component = strtok(NULL, SEP);
     }
     getchar();
     scanf("%[^\n]", value);
-    changevalueDir(x, value);
+    Pathchangevalue(path, value);
 }
 
-void list(pnodeDirs* pDirs) {
-    pDir x = LLdirslookup(pDirs, "root");
-    char buffer[200], path[200] = "/";
-    char* token;
+void list(pnodePaths* pPaths) {
+    pPath path = LLpathslookup(pPaths, ROOT_NAME);
+    char buffer[MAX_INPUT_BUFFER], name[MAX_INPUT_BUFFER] = SEP;
+    char* component;
     int c = getchar();
     if (c == '\n') {
-        listDir(x);
+        Pathlist(path);
         return;
     } else {
         scanf("%s", buffer);
-        token = strtok(buffer, "/");
-        while (token != NULL) {
-            strcat(path, token);
-            strcat(path, "/");
-            token = strtok(NULL, "/");
+        component = strtok(buffer, SEP);
+        while (component != NULL) {
+            strcat(name, component);
+            strcat(name, SEP);
+            component = strtok(NULL, SEP);
         }
-        path[strlen(path) - 1] = '\0';
-        x = LLdirslookuppath(pDirs, path);
-        if (x == NULL) {
+        name[strlen(name) - 1] = '\0';
+        path = LLpathslookup(pPaths, name);
+        if (path == NULL) {
             puts(NOT_FOUND_ERROR);
             return;
         }
-        listDir(x);
+        Pathlist(path);
     }
 }
 
-void search(pnodeDirs* pDirs) {
-    pDir x;
+void search(pnodePaths* pPaths) {
+    pPath path;
     char value[200];
     getchar();
     scanf("%[^\n]", value);
-    x = LLdirssearch(pDirs, value);
-    if (x == NULL) {
+    path = LLpathssearchbyvalue(pPaths, value);
+    if (path == NULL) {
         puts(NOT_FOUND_ERROR);
         return;
     }
-    puts(x->path);
+    puts(path->name);
 }
 
-void find(pnodeDirs* pDirs) {
-    pDir x;
-    char buffer[200], path[200] = "/";
-    char* token;
+void find(pnodePaths* pPaths) {
+    pPath path;
+    char buffer[MAX_INPUT_BUFFER], name[MAX_INPUT_BUFFER] = SEP;
+    char* component;
     scanf("%s", buffer);
-    token = strtok(buffer, "/");
-    while (token != NULL) {
-        strcat(path, token);
-        strcat(path, "/");
-        token = strtok(NULL, "/");
+    component = strtok(buffer, SEP);
+    while (component != NULL) {
+        strcat(name, component);
+        strcat(name, SEP);
+        component = strtok(NULL, SEP);
     }
-    path[strlen(path) - 1] = '\0';
-    x = LLdirslookuppath(pDirs, path);
-    if (x == NULL) {
+    name[strlen(name) - 1] = '\0';
+    path = LLpathslookup(pPaths, name);
+    if (path == NULL) {
         puts(NOT_FOUND_ERROR);
         return;
     }
-    if (strcmp(x->value, "") == 0) {
+    if (strcmp(path->value, NULL_VALUE) == 0) {
         puts(NO_DATA_ERROR);
         return;
     }
-    puts(x->value);
+    puts(path->value);
 }
 
-void print(pnodeDirs* pDirs) {
-    pDir root = LLdirslookup(pDirs, "root");
-    LLdirsprint(pDirs, root);
+void print(pnodePaths* pPaths) {
+    pPath root = LLpathslookup(pPaths, ROOT_NAME);
+    LLpathsprint(pPaths, root);
 }
 
-void delete (pnodeDirs* pDirs) {
-    pDir x = LLdirslookup(pDirs, "root");
-    pDir father;
+void delete (pnodePaths* pPaths) {
+    pPath path = LLpathslookup(pPaths, ROOT_NAME);
+    pPath father;
     int count = 0;
-    char buffer[200], path[200] = "/", fpath[200] = "/";
-    char *token, *last;
+    char buffer[MAX_INPUT_BUFFER], name[MAX_INPUT_BUFFER] = SEP, fname[MAX_INPUT_BUFFER] = SEP;
+    char *component, *lcomponent;
     int c = getchar();
     if (c == '\n') {
-        LLdirsfree(pDirs);
-        x = NEWDir("root", "root", "");
-        LLdirsinsert(pDirs, x);
+        LLpathsfree(pPaths);
+        path = NEWPath(ROOT_NAME, ROOT_LCOMPONENT, NULL_VALUE);
+        LLpathsinsert(pPaths, path);
         return;
     }
     scanf("%s", buffer);
-    token = strtok(buffer, "/");
-    while (token != NULL) {
-        strcat(path, token);
-        strcat(path, "/");
-        last = token;
-        token = strtok(NULL, "/");
-        if (token != NULL) {
-            strcat(fpath, last);
-            strcat(fpath, "/");
+    component = strtok(buffer, SEP);
+    while (component != NULL) {
+        strcat(name, component);
+        strcat(name, SEP);
+        lcomponent = component;
+        component = strtok(NULL, SEP);
+        if (component != NULL) {
+            strcat(fname, lcomponent);
+            strcat(fname, SEP);
         }
         count++;
     }
-    path[strlen(path) - 1] = '\0';
-    fpath[strlen(fpath) - 1] = '\0';
-    x = LLdirslookuppath(pDirs, path);
-    if (x == NULL) {
+    name[strlen(name) - 1] = '\0';
+    fname[strlen(fname) - 1] = '\0';
+    path = LLpathslookup(pPaths, name);
+    if (path == NULL) {
         puts(NOT_FOUND_ERROR);
         return;
     }
     if (count == 1)
-        father = LLdirslookuppath(pDirs, "root");
+        father = LLpathslookup(pPaths, ROOT_NAME);
     else
-        father = LLdirslookuppath(pDirs, fpath);
-    STdelete(father->subdirsABC, x->name);
-    LLdirsdelete(pDirs, x);
+        father = LLpathslookup(pPaths, fname);
+    LLdelete(father->icomponentsOC, path->name);
+    STdelete(father->icomponentsABC, path->lcomponent);
+    LLpathsdelete(pPaths, path);
 }
