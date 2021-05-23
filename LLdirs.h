@@ -16,5 +16,6 @@ pDir LLdirslookup(pnodeDirs*, char*);
 pDir LLdirslookuppath(pnodeDirs*, char*);
 pDir LLdirssearch(pnodeDirs*, char*);
 void LLdirsprint(pnodeDirs*, pDir);
+void LLdirsdelete(pnodeDirs*, pDir);
 
 #endif

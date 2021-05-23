@@ -155,6 +155,14 @@ void traverseInOrder(link head) {
     traverseInOrder(head->r);
 }
 
+void traversePostOrder(link head) {
+    if (head == NULL)
+        return;
+    traversePostOrder(head->l);
+    traversePostOrder(head->r);
+    puts(head->path);
+}
+
 link rotL(link head) {
     link x = head->r;
     head->r = x->l;

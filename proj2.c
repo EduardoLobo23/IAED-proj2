@@ -85,7 +85,7 @@ void quit(pnodeDirs* pDirs) {
 
 void set(pnodeDirs* pDirs) {
     pDir x = LLdirslookup(pDirs, "root");
-    char path[200] = "/", value[200], buffer[200];
+    char path[65525] = "/", value[200], buffer[65525];
     char* token;
 
     scanf("%s", buffer);
@@ -177,8 +177,10 @@ void print(pnodeDirs* pDirs) {
 
 void delete (pnodeDirs* pDirs) {
     pDir x = LLdirslookup(pDirs, "root");
-    char buffer[200], path[200] = "";
-    char *token, *name;
+    pDir father;
+    int count = 0;
+    char buffer[200], path[200] = "/", fpath[200] = "/";
+    char *token, *last;
     int c = getchar();
     if (c == '\n') {
         LLdirsfree(pDirs);
@@ -190,9 +192,26 @@ void delete (pnodeDirs* pDirs) {
     token = strtok(buffer, "/");
     while (token != NULL) {
         strcat(path, token);
-        name = token;
+        strcat(path, "/");
+        last = token;
         token = strtok(NULL, "/");
+        if (token != NULL) {
+            strcat(fpath, last);
+            strcat(fpath, "/");
+        }
+        count++;
     }
-    x = LLdirslookup(pDirs, name);
-    freeDir(x);
+    path[strlen(path) - 1] = '\0';
+    fpath[strlen(fpath) - 1] = '\0';
+    x = LLdirslookuppath(pDirs, path);
+    if (x == NULL) {
+        puts(NOT_FOUND_ERROR);
+        return;
+    }
+    if (count == 1)
+        father = LLdirslookuppath(pDirs, "root");
+    else
+        father = LLdirslookuppath(pDirs, fpath);
+    STdelete(father->subdirsABC, x->name);
+    LLdirsdelete(pDirs, x);
 }

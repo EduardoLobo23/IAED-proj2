@@ -40,11 +40,13 @@ void LLprint(pnode head) {
 }
 
 pnode deletenode(pnode head, char* path) {
-    pnode t;
-    for (t = head; t != NULL; t = t->next) {
+    pnode t, prev;
+    for (t = head, prev = NULL; t != NULL; prev = t, t = t->next) {
         if (strcmp(t->path, path) == 0) {
             if (t == head)
                 head = t->next;
+            else
+                prev->next = t->next;
             free(t->path);
             free(t->name);
             free(t);

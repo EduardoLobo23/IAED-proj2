@@ -30,11 +30,13 @@ void LLdirsinsert(pnodeDirs* head, pDir dir) {
 }
 
 pnodeDirs deletenodeDirs(pnodeDirs head, char* path) {
-    pnodeDirs t;
-    for (t = head; t != NULL; t = t->next) {
+    pnodeDirs t, prev;
+    for (t = head, prev = NULL; t != NULL; prev = t, t = t->next) {
         if (strcmp(t->dir->path, path) == 0) {
             if (t == head)
                 head = t->next;
+            else
+                prev->next = t->next;
             freeDir(t->dir);
             free(t);
             break;
@@ -86,21 +88,32 @@ void LLdirsfree(pnodeDirs* head) {
     *head = freenodeDirs(*head);
 }
 
-pnodeDirs searchDirs(pnodeDirs head, char* value) {
-    pnodeDirs t;
-    for (t = head; t != NULL; t = t->next) {
-        if (strcmp(t->dir->value, value) == 0)
-            return t;
-    }
+pDir searchDirs(pnodeDirs* head, pDir dir, char* value) {
+    pnode t;
+    pDir d;
+
+    if (strcmp(dir->value, value) == 0)
+        return dir;
+    if (dir->subdirsOC != NULL)
+        for (t = *(dir->subdirsOC); t != NULL; t = t->next) {
+            d = LLdirslookuppath(head, t->path);
+            if (d != NULL) {
+                if (strcmp(d->value, value) == 0)
+                    return d;
+                d = searchDirs(head, d, value);
+                if (d != NULL)
+                    return d;
+            }
+        }
     return NULL;
 }
 
 pDir LLdirssearch(pnodeDirs* head, char* value) {
-    pnodeDirs aux;
-    aux = searchDirs(*head, value);
-    if (aux == NULL)
+    pDir root = LLdirslookuppath(head, "root");
+    root = searchDirs(head, root, value);
+    if (root == NULL)
         return NULL;
-    return aux->dir;
+    return root;
 }
 
 void LLdirsprint(pnodeDirs* pDirs, pDir dir) {
@@ -108,10 +121,39 @@ void LLdirsprint(pnodeDirs* pDirs, pDir dir) {
     pDir d;
     for (; t != NULL; t = t->next) {
         d = LLdirslookuppath(pDirs, t->path);
-        if (strcmp(d->value, "") != 0)
-            printf("%s %s\n", d->path, d->value);
-        if (d->subdirsOC != NULL) {
-            LLdirsprint(pDirs, d);
+        if (d != NULL) {
+            if (strcmp(d->value, "") != 0)
+                printf("%s %s\n", d->path, d->value);
+            if (d->subdirsOC != NULL)
+                LLdirsprint(pDirs, d);
         }
     }
+}
+
+pnodeDirs LLdirsdeleteaux(pnodeDirs* pDirs, pDir dir) {
+    pnode t;
+    pDir d;
+    for (t = *(dir->subdirsOC); t != NULL; t = t->next) {
+        d = LLdirslookuppath(pDirs, t->path);
+        if (d->subdirsOC != NULL)
+            *pDirs = LLdirsdeleteaux(pDirs, d);
+        *pDirs = deletenodeDirs(*pDirs, d->path);
+    }
+
+    return deletenodeDirs(*pDirs, dir->path);
+}
+
+void deletetry(pnodeDirs* pDirs, pDir dir) {
+    pnode t = *(dir->subdirsOC);
+    pDir d;
+    for (; t != NULL; t = t->next) {
+        d = LLdirslookuppath(pDirs, t->path);
+        if (d->subdirsOC != NULL)
+            deletetry(pDirs, d);
+    }
+    *pDirs = deletenodeDirs(*pDirs, dir->path);
+}
+
+void LLdirsdelete(pnodeDirs* head, pDir dir) {
+    deletetry(head, dir);
 }

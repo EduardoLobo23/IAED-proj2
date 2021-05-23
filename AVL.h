@@ -18,5 +18,6 @@ int STcount(link);
 char *STsearch(link, char *);
 void STsort(link);
 void STfree(link *);
+void STdelete(link *, char *);
 
 #endif
